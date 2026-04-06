@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sneaker Shop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px 0 10px 0;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .producto-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .producto-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .producto-imagen {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background-color: #e9e9e9;
+        }
+
+        .producto-info {
+            padding: 20px;
+        }
+
+        .producto-nombre {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #222;
+        }
+
+        .producto-descripcion {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .producto-precio {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c7da0;
+            margin-bottom: 20px;
+        }
+
+        .btn-whatsapp {
+            display: inline-block;
+            background-color: #25D366;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            transition: background-color 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: #128C7E;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #888;
+            font-size: 0.8rem;
+            border-top: 1px solid #ddd;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>👟 Mi Tienda de Tenis</h1>
+    <p class="subtitle">Selecciona tu modelo favorito y aparta por WhatsApp</p>
+
+    <div class="productos-grid" id="lista-productos">
+        <div class="loading">Cargando productos...</div>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 - Mi Tienda de Tenis | Aparta tu producto por WhatsApp</p>
+    </div>
+</div>
+
+<script>
+    // 🔴 SOLO CAMBIA ESTE NÚMERO POR EL TUYO 🔴
+    // Ejemplo: 521234567890 (México), 11234567890 (USA), 34123456789 (España)
+    const TU_NUMERO = "2713933425";
+
+    async function cargarProductos() {
+        try {
+            const respuesta = await fetch('productos/index.json');
+            if (!respuesta.ok) throw new Error('No hay productos');
+            const productos = await respuesta.json();
+            
+            // Ordenar productos por el campo "orden" (si existe)
+            productos.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+            
+            const contenedor = document.getElementById('lista-productos');
+            contenedor.innerHTML = '';
+            
+            productos.forEach(producto => {
+                const nombre = producto.nombre || 'Sin nombre';
+                const descripcion = producto.descripcion || '';
+                const precio = producto.precio || 'Consultar';
+                const imagen = producto.imagen || 'https://placehold.co/600x400/cccccc/white?text=Sin+Imagen';
+                const mensaje = `Hola, quiero apartar: ${nombre} - ${precio}`;
+                const urlWA = `https://wa.me/${TU_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+                
+                contenedor.innerHTML += `
+                    <div class="producto-card">
+                        <img class="producto-imagen" src="${imagen}" alt="${nombre}">
+                        <div class="producto-info">
+                            <div class="producto-nombre">${nombre}</div>
+                            <div class="producto-descripcion">${descripcion}</div>
+                            <div class="producto-precio">${precio}</div>
+                            <a href="${urlWA}" class="btn-whatsapp" target="_blank">📱 Apartar por WhatsApp</a>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (error) {
+            document.getElementById('lista-productos').innerHTML = `
+                <div style="text-align:center; padding:40px; background:white; border-radius:16px;">
+                    <h3>📦 No hay productos aún</h3>
+                    <p>Ve a <strong>tudominio.netlify.app/admin</strong> y agrega tu primer producto</p>
+                </div>
+            `;
+        }
+    }
+    
+    cargarProductos();
+</script>
+</body>
+</html>
